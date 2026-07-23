@@ -1,1 +1,149 @@
 
+<!-- index.html -->
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Module 2 – Analyse du Besoin & CDCF</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- FontAwesome 6.4.0 -->
+  <link
+    rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+    integrity="sha512-pIVpG8G3Kx1eJQ+ZqCkCmZJLdnOjFkWDXLI4YAlnXrhIRbkIuAeGHNirMRHkRkNvMNFVQVw1K7E3WZf2T2zYvw=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"
+  />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header class="main-header">
+    <div class="header-content">
+      <h1>Module 2 – Analyse du Besoin & CDCF</h1>
+      <p class="subtitle">Parcours Ingénierie des Besoins – Auto‑formation interactive</p>
+      <span class="badge">
+        <i class="fa-solid fa-id-badge"></i> Module 01mr durand01
+      </span>
+    </div>
+  </header>
+
+  <main>
+    <!-- Section 1 : Cours -->
+    <section id="section-cours" class="section">
+      <h2><i class="fa-solid fa-book-open"></i> Cours – Apports théoriques</h2>
+      <div id="cours-grid" class="cours-grid"></div>
+
+      <h3 class="timeline-title">
+        <i class="fa-solid fa-timeline"></i> Frise chronologique de la séance
+      </h3>
+      <div id="timeline" class="timeline"></div>
+
+      <div class="section-actions">
+        <button id="start-quiz-btn" class="btn primary">
+          <i class="fa-solid fa-play"></i> Lancer le quiz de compréhension
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 2 : Quiz -->
+    <section id="section-quiz" class="section hidden">
+      <h2><i class="fa-solid fa-circle-question"></i> Quiz de compréhension</h2>
+
+      <div class="quiz-header">
+        <div class="timer" id="quiz-timer">
+          <i class="fa-solid fa-clock"></i> Temps restant : <span id="quiz-time-display">20:00</span>
+        </div>
+        <div class="progress-container">
+          <span>Progression</span>
+          <div class="progress-bar">
+            <div id="quiz-progress" class="progress-fill"></div>
+          </div>
+        </div>
+      </div>
+
+      <form id="quiz-form" class="quiz-form"></form>
+
+      <div class="section-actions">
+        <button id="submit-quiz-btn" class="btn primary">
+          <i class="fa-solid fa-check"></i> Valider le quiz
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 3 : Exercices pratiques -->
+    <section id="section-eval" class="section hidden">
+      <h2><i class="fa-solid fa-flask"></i> Exercices pratiques – Atelier</h2>
+
+      <p class="section-note">
+        15 exercices interactifs – Score total : 40 points – Chronomètre individuel de 90 secondes par exercice.
+      </p>
+
+      <div class="eval-header">
+        <div class="timer" id="eval-timer">
+          <i class="fa-solid fa-stopwatch"></i> Temps exercice : <span id="eval-time-display">01:30</span>
+        </div>
+        <div class="eval-index">
+          Exercice <span id="eval-current-index">1</span> / <span id="eval-total">15</span>
+        </div>
+      </div>
+
+      <div id="eval-container" class="eval-container"></div>
+
+      <div class="section-actions eval-actions">
+        <button id="eval-prev-btn" class="btn secondary">
+          <i class="fa-solid fa-arrow-left"></i> Précédent
+        </button>
+        <button id="eval-next-btn" class="btn primary">
+          Suivant <i class="fa-solid fa-arrow-right"></i>
+        </button>
+      </div>
+    </section>
+
+    <!-- Section 4 : Bilan & Restitution -->
+    <section id="section-bilan" class="section hidden">
+      <h2><i class="fa-solid fa-chart-line"></i> Bilan & Restitution</h2>
+
+      <div id="bilan-zone" class="bilan-zone">
+        <div class="bilan-summary">
+          <p><strong>Score quiz :</strong> <span id="bilan-quiz-score">0</span> / 15</p>
+          <p><strong>Score exercices :</strong> <span id="bilan-eval-score">0</span> / 40</p>
+          <p><strong>Note globale :</strong> <span id="bilan-total-score">0</span> / 55</p>
+          <p><strong>Mention :</strong> <span id="bilan-mention">–</span></p>
+        </div>
+
+        <div class="bilan-details">
+          <h3>Détail des réponses</h3>
+          <div id="bilan-details-quiz" class="bilan-block">
+            <h4><i class="fa-solid fa-list-check"></i> Quiz de compréhension</h4>
+            <div id="bilan-quiz-list"></div>
+          </div>
+          <div id="bilan-details-eval" class="bilan-block">
+            <h4><i class="fa-solid fa-flask-vial"></i> Exercices pratiques</h4>
+            <div id="bilan-eval-list"></div>
+          </div>
+        </div>
+      </div>
+
+      <div class="section-actions bilan-actions">
+        <button id="download-pdf-btn" class="btn primary">
+          <i class="fa-solid fa-file-pdf"></i> Télécharger le bilan en PDF
+        </button>
+        <button id="restart-btn" class="btn secondary">
+          <i class="fa-solid fa-rotate-right"></i> Recommencer la session
+        </button>
+      </div>
+    </section>
+  </main>
+
+  <footer class="main-footer">
+    <p>© 2026 – Module 2 Analyse du Besoin & CDCF – Auto‑formation interactive</p>
+  </footer>
+
+  <!-- html2pdf.js 0.10.1 -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
+    integrity="sha512-YcsIPZqGqZqzT3bZQzQ0jrISFRCGDpa2BkLomqKgJo0vvArkH5vWckHQwZ0pniS3pSkeCZg2nZkGq5cWkQ1QJQ=="
+    crossorigin="anonymous"
+    referrerpolicy="no-referrer"></script>
+  <script src="script.js"></script>
+</body>
+</html>
