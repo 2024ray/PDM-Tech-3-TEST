@@ -1,530 +1,616 @@
-
+// script.js
 let data = null;
+
+// État
 let quizQuestions = [];
-let evalQuestions = [];
-let quizIndex = 0;
-let evalIndex = 0;
-let scoreQuiz = 0;
-let scoreEval = 0;
-let detailsQuiz = [];
-let detailsEval = [];
-let timerQuiz = null;
-let timerEval = null;
-let tempsQuizRestant = 20 * 60;
+let evalExercises = [];
+let quizTimer = null;
+let evalTimer = null;
+let quizTimeRemaining = 20 * 60; // 20 minutes en secondes
+let evalTimeRemaining = 90; // 90 secondes
+let quizAnswers = {};
+let evalAnswers = {};
+let quizScore = 0;
+let evalScore = 0;
 
-function $(sel) { return document.querySelector(sel); }
-function $$(sel) { return document.querySelectorAll(sel); }
-
+// Utilitaires
 function shuffle(array) {
-    const arr = [...array];
-    for (let i = arr.length - 1; i > 0; i--) {
-        const j = Math.floor(Math.random() * (i + 1));
-        [arr[i], arr[j]] = [arr[j], arr[i]];
-    }
-    return arr;
+  for (let i = array.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [array[i], array[j]] = [array[j], array[i]];
+  }
+  return array;
 }
 
-function formatTemps(s) {
-    const m = Math.floor(s / 60);
-    const sec = s % 60;
-    return `${String(m).padStart(2,'0')}:${String(sec).padStart(2,'0')}`;
+function normalizeText(str) {
+  if (!str) return "";
+  return str
+    .toLowerCase()
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 }
 
-function normaliserTexte(texte, ignorerCasse, ignorerAccents) {
-    let t = texte.trim().toLowerCase();
-    if (ignorerAccents) t = t.normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    return t;
+// Chargement des données
+async function loadData() {
+  const res = await fetch("questions.json?t=" + Date.now());
+  data = await res.json();
+  initCours();
+  initQuiz();
+  initEvaluation();
 }
 
-function remplacerTrous(texte, elements) {
-    const parties = texte.split('{{}}');
-    let resultat = parties[0];
-    for (let i = 0; i < elements.length; i++) {
-        resultat += elements[i] + (parties[i + 1] || '');
-    }
-    return resultat;
-}
+// Initialisation cours
+function initCours() {
+  const grid = document.getElementById("cours-grid");
+  const timeline = document.getElementById("timeline");
+  const cours = data.cours;
 
-// ========== CHARGEMENT DES DONNÉES ==========
-async function chargerDonnees() {
-    try {
-        const res = await fetch('questions.json?t=' + Date.now(), { cache: 'no-store' });
-        if (!res.ok) throw new Error(`HTTP ${res.status}`);
-        data = await res.json();
-    } catch (e) {
-        console.error("Erreur de chargement du JSON:", e);
-        return;
-    }
-    initialiserCours();
-    preparerQuiz();
-    preparerEval();
-}
+  // Introduction
+  const introCard = document.createElement("article");
+  introCard.className = "cours-card card-intro";
+  introCard.innerHTML = `
+    <h3>${cours.introduction.titre}</h3>
+    <p>${cours.introduction.contenu}</p>
+  `;
+  grid.appendChild(introCard);
 
-// ========== INITIALISATION DU COURS (STYLE ÉPURÉ) ==========
-function initialiserCours() {
-    const icons = [
-        "fa-solid fa-bullseye",
-        "fa-solid fa-diagram-project",
-        "fa-solid fa-file-contract",
-        "fa-solid fa-timeline"
-    ];
-
-    let html = `
-        <div class="cours-intro-box">
-            <div class="intro-icon"><i class="fa-solid fa-compass"></i></div>
-            <div class="intro-content">
-                <strong>Focus du Module 2</strong>
-                <p>${data.cours.introduction}</p>
-            </div>
-        </div>
+  // Sections
+  cours.sections.forEach((sec) => {
+    const card = document.createElement("article");
+    card.className = `cours-card card-${sec.couleur}`;
+    card.innerHTML = `
+      <h3>${sec.titre}</h3>
+      <p>${sec.contenu}</p>
     `;
+    grid.appendChild(card);
+  });
 
-    data.cours.sections.forEach((s, index) => {
-        const iconClass = icons[index] || "fa-solid fa-bookmark";
-        
-        if (s.titre.includes("Déroulement")) {
-            html += `
-                <div class="cours-card full-width">
-                    <div class="card-icon"><i class="${iconClass}"></i></div>
-                    <div class="card-body">
-                        <h3>${s.titre}</h3>
-                        <p class="section-desc">${s.contenu}</p>
-                        <div class="timeline-container">
-                            <div class="timeline-step">
-                                <span class="step-num">1</span>
-                                <span class="step-title">Introduction</span>
-                                <span class="step-desc">Objectifs & Cadre</span>
-                            </div>
-                            <div class="timeline-step">
-                                <span class="step-num">2</span>
-                                <span class="step-title">Théorie</span>
-                                <span class="step-desc">Cours & CDCF</span>
-                            </div>
-                            <div class="timeline-step">
-                                <span class="step-num">3</span>
-                                <span class="step-title">Pratique</span>
-                                <span class="step-desc">Cas concrets</span>
-                            </div>
-                            <div class="timeline-step">
-                                <span class="step-num">4</span>
-                                <span class="step-title">Restitution</span>
-                                <span class="step-desc">Débat & Bilan</span>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+  // Timeline
+  cours.timeline.forEach((step, index) => {
+    const item = document.createElement("div");
+    item.className = "timeline-item";
+    item.innerHTML = `
+      <div class="timeline-icon">
+        <i class="fa-solid ${step.icone}"></i>
+      </div>
+      <div class="timeline-content">
+        <span class="timeline-step">Étape ${index + 1}</span>
+        <h4>${step.etape}</h4>
+        <p>${step.description}</p>
+      </div>
+    `;
+    timeline.appendChild(item);
+  });
+}
+
+// Initialisation quiz
+function initQuiz() {
+  quizQuestions = shuffle([...data.quizComprehension]);
+  const form = document.getElementById("quiz-form");
+  form.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const block = document.createElement("div");
+    block.className = "quiz-question";
+    block.dataset.qid = q.id;
+
+    const optionsShuffled = shuffle([...q.options]);
+
+    block.innerHTML = `
+      <div class="quiz-question-header">
+        <span class="quiz-index">Question ${idx + 1} / ${quizQuestions.length}</span>
+        <span class="quiz-points">${q.points} pt${q.points > 1 ? "s" : ""}</span>
+      </div>
+      <p class="quiz-text">${q.question}</p>
+      <div class="quiz-options">
+        ${optionsShuffled
+          .map((opt, optIndex) => {
+            const inputName = `quiz-q-${q.id}`;
+            const type = q.type === "choix-multiple" ? "checkbox" : "radio";
+            const id = `${inputName}-${optIndex}`;
+            return `
+              <label class="quiz-option">
+                <input type="${type}" name="${inputName}" value="${opt}" id="${id}" />
+                <span>${opt}</span>
+              </label>
             `;
+          })
+          .join("")}
+      </div>
+    `;
+    form.appendChild(block);
+  });
+
+  updateQuizProgress();
+}
+
+// Initialisation évaluation
+let currentEvalIndex = 0;
+
+function initEvaluation() {
+  evalExercises = shuffle([...data.evaluation]);
+  document.getElementById("eval-total").textContent = evalExercises.length;
+  currentEvalIndex = 0;
+  renderCurrentEval();
+}
+
+// Rendu d'un exercice
+function renderCurrentEval() {
+  const container = document.getElementById("eval-container");
+  container.innerHTML = "";
+  const ex = evalExercises[currentEvalIndex];
+  document.getElementById("eval-current-index").textContent = currentEvalIndex + 1;
+
+  const badgeClass =
+    ex.niveau === "Facile"
+      ? "badge-level badge-easy"
+      : ex.niveau === "Moyen"
+      ? "badge-level badge-medium"
+      : "badge-level badge-hard";
+
+  const wrapper = document.createElement("div");
+  wrapper.className = "eval-exercise";
+  wrapper.dataset.eid = ex.id;
+
+  let content = `
+    <div class="eval-header-row">
+      <span class="${badgeClass}">${ex.niveau}</span>
+      <span class="eval-points">${ex.points} pt${ex.points > 1 ? "s" : ""}</span>
+    </div>
+  `;
+
+  if (ex.type === "tableau-menu") {
+    content += `<p class="eval-text">${ex.intitule}</p>`;
+    content += `<table class="eval-table"><tbody>`;
+    ex.tableau.forEach((row, idx) => {
+      content += `
+        <tr>
+          <td>${row.label}</td>
+          <td>
+            <select data-row-index="${idx}" class="eval-select">
+              <option value="">-- Choisir --</option>
+              ${shuffle([...row.options])
+                .map((opt) => `<option value="${opt}">${opt}</option>`)
+                .join("")}
+            </select>
+          </td>
+        </tr>
+      `;
+    });
+    content += `</tbody></table>`;
+  } else if (ex.type === "choix-unique" || ex.type === "choix-multiple") {
+    content += `<p class="eval-text">${ex.question}</p>`;
+    content += `<div class="eval-options">`;
+    const optionsShuffled = shuffle([...ex.options]);
+    optionsShuffled.forEach((opt, idx) => {
+      const inputName = `eval-${ex.id}`;
+      const type = ex.type === "choix-multiple" ? "checkbox" : "radio";
+      const id = `${inputName}-${idx}`;
+      content += `
+        <label class="eval-option">
+          <input type="${type}" name="${inputName}" value="${opt}" id="${id}" />
+          <span>${opt}</span>
+        </label>
+      `;
+    });
+    content += `</div>`;
+  } else if (ex.type === "valeur-numerique") {
+    content += `<p class="eval-text">${ex.question}</p>`;
+    content += `
+      <div class="eval-input-row">
+        <input type="number" step="any" class="eval-input-number" />
+        <span class="eval-unit">${ex.unite}</span>
+      </div>
+    `;
+  } else if (ex.type === "reponse-saisie") {
+    content += `<p class="eval-text">${ex.question}</p>`;
+    content += `
+      <input type="text" class="eval-input-text" placeholder="Votre réponse" />
+    `;
+  } else if (ex.type === "association") {
+    content += `<p class="eval-text">${ex.intitule}</p>`;
+    content += `<table class="eval-table"><tbody>`;
+    ex.paires.forEach((pair, idx) => {
+      content += `
+        <tr>
+          <td>${pair.gauche}</td>
+          <td>
+            <select data-pair-index="${idx}" class="eval-select">
+              <option value="">-- Associer --</option>
+              ${shuffle([...pair.droiteOptions])
+                .map((opt) => `<option value="${opt}">${opt}</option>`)
+                .join("")}
+            </select>
+          </td>
+        </tr>
+      `;
+    });
+    content += `</tbody></table>`;
+  } else if (ex.type === "texte-trous-libre" || ex.type === "texte-trous-liste-unique" || ex.type === "texte-trous-liste-variable") {
+    content += `<p class="eval-text">Texte à compléter :</p>`;
+    const parts = ex.texte.split("______");
+    let htmlTexte = "";
+    for (let i = 0; i < parts.length; i++) {
+      htmlTexte += `<span>${parts[i]}</span>`;
+      if (i < ex.trous.length) {
+        const trou = ex.trous[i];
+        if (ex.type === "texte-trous-libre") {
+          htmlTexte += `<input type="text" class="eval-input-text eval-blank" data-blank-index="${i}" />`;
         } else {
-            html += `
-                <div class="cours-card">
-                    <div class="card-icon"><i class="${iconClass}"></i></div>
-                    <div class="card-body">
-                        <h3>${s.titre}</h3>
-                        <p>${s.contenu}</p>
-                    </div>
-                </div>
-            `;
+          const options = shuffle([...trou.options]);
+          htmlTexte += `
+            <select class="eval-select eval-blank" data-blank-index="${i}">
+              <option value="">-- Choisir --</option>
+              ${options.map((opt) => `<option value="${opt}">${opt}</option>`).join("")}
+            </select>
+          `;
         }
-    });
-
-    $('#contenu-cours').innerHTML = html;
-}
-
-// ========== QUIZ (15 QUESTIONS) ==========
-function preparerQuiz() {
-    quizQuestions = shuffle(data.quizComprehension).map(q => ({ ...q, options: shuffle(q.options) }));
-    $('#btn-commencer-quiz').addEventListener('click', demarrerQuiz);
-}
-
-function demarrerQuiz() {
-    $('#section-cours').classList.add('hidden');
-    $('#section-quiz').classList.remove('hidden');
-    quizIndex = 0;
-    scoreQuiz = 0;
-    detailsQuiz = [];
-    tempsQuizRestant = 20 * 60;
-    afficherQuestionQuiz();
-    lancerTimerQuiz();
-}
-
-function afficherQuestionQuiz() {
-    if (quizIndex >= quizQuestions.length) { terminerQuiz(); return; }
-    const q = quizQuestions[quizIndex];
-    $('#quiz-progress').textContent = `Question ${quizIndex + 1} / ${quizQuestions.length}`;
-    $('#quiz-progress-bar').style.width = `${(quizIndex / quizQuestions.length) * 100}%`;
-    $('#quiz-question').innerHTML = `<strong>Q${quizIndex + 1}.</strong> ${q.question}`;
-    
-    const optDiv = $('#quiz-options');
-    optDiv.innerHTML = '';
-    q.options.forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option-item';
-        div.innerHTML = `<input type="radio" name="quiz-opt" id="qopt${i}" value="${i}"><label for="qopt${i}">${opt.texte}</label>`;
-        div.addEventListener('click', () => {
-            $$('#quiz-options .option-item').forEach(el => el.classList.remove('selected'));
-            div.classList.add('selected');
-            div.querySelector('input').checked = true;
-        });
-        optDiv.appendChild(div);
-    });
-    $('#btn-suivant-quiz').classList.remove('hidden');
-}
-
-function lancerTimerQuiz() {
-    clearInterval(timerQuiz);
-    mettreAJourTimerQuiz();
-    timerQuiz = setInterval(() => {
-        tempsQuizRestant--;
-        mettreAJourTimerQuiz();
-        if (tempsQuizRestant <= 0) { clearInterval(timerQuiz); terminerQuiz(); }
-    }, 1000);
-}
-
-function mettreAJourTimerQuiz() {
-    const t = $('#quiz-timer');
-    t.textContent = `⏱️ ${formatTemps(tempsQuizRestant)}`;
-    t.classList.toggle('warning', tempsQuizRestant < 60);
-}
-
-$('#btn-suivant-quiz').addEventListener('click', () => {
-    const sel = document.querySelector('input[name="quiz-opt"]:checked');
-    const q = quizQuestions[quizIndex];
-    let bonne = false;
-    if (sel) {
-        bonne = q.options[parseInt(sel.value)].correct;
-        if (bonne) scoreQuiz++;
+      }
     }
-    detailsQuiz.push({
-        question: q.question,
-        reponseEleve: sel ? q.options[parseInt(sel.value)].texte : 'Aucune réponse',
-        bonneReponse: q.options.find(o => o.correct).texte,
-        correct: bonne
+    content += `<div class="eval-text-blanks">${htmlTexte}</div>`;
+  }
+
+  wrapper.innerHTML = content;
+  container.appendChild(wrapper);
+
+  resetEvalTimer();
+}
+
+// Chronomètre quiz
+function startQuizTimer() {
+  clearInterval(quizTimer);
+  quizTimeRemaining = 20 * 60;
+  quizTimer = setInterval(() => {
+    quizTimeRemaining--;
+    if (quizTimeRemaining <= 0) {
+      quizTimeRemaining = 0;
+      clearInterval(quizTimer);
+      alert("Temps du quiz écoulé. Vos réponses vont être enregistrées.");
+      computeQuizScore();
+    }
+    updateQuizTimerDisplay();
+  }, 1000);
+}
+
+function updateQuizTimerDisplay() {
+  const display = document.getElementById("quiz-time-display");
+  const minutes = String(Math.floor(quizTimeRemaining / 60)).padStart(2, "0");
+  const seconds = String(quizTimeRemaining % 60).padStart(2, "0");
+  display.textContent = `${minutes}:${seconds}`;
+}
+
+// Chronomètre évaluation
+function resetEvalTimer() {
+  clearInterval(evalTimer);
+  evalTimeRemaining = 90;
+  updateEvalTimerDisplay();
+  const timerEl = document.getElementById("eval-timer");
+  timerEl.classList.remove("warning");
+
+  evalTimer = setInterval(() => {
+    evalTimeRemaining--;
+    if (evalTimeRemaining <= 10) {
+      timerEl.classList.add("warning");
+    }
+    if (evalTimeRemaining <= 0) {
+      evalTimeRemaining = 0;
+      clearInterval(evalTimer);
+      alert("Temps de l'exercice écoulé. Vous pouvez passer au suivant.");
+    }
+    updateEvalTimerDisplay();
+  }, 1000);
+}
+
+function updateEvalTimerDisplay() {
+  const display = document.getElementById("eval-time-display");
+  const minutes = String(Math.floor(evalTimeRemaining / 60)).padStart(2, "0");
+  const seconds = String(evalTimeRemaining % 60).padStart(2, "0");
+  display.textContent = `${minutes}:${seconds}`;
+}
+
+// Progression quiz
+function updateQuizProgress() {
+  const progress = document.getElementById("quiz-progress");
+  const total = quizQuestions.length;
+  const answered = Object.keys(quizAnswers).length;
+  const percent = (answered / total) * 100;
+  progress.style.width = `${percent}%`;
+}
+
+// Collecte réponses quiz
+function collectQuizAnswers() {
+  quizAnswers = {};
+  quizQuestions.forEach((q) => {
+    const name = `quiz-q-${q.id}`;
+    const inputs = document.querySelectorAll(`input[name="${name}"]`);
+    const selected = [];
+    inputs.forEach((inp) => {
+      if (inp.checked) selected.push(inp.value);
     });
-    quizIndex++;
-    afficherQuestionQuiz();
+    quizAnswers[q.id] = selected;
+  });
+  updateQuizProgress();
+}
+
+// Correction quiz
+function computeQuizScore() {
+  collectQuizAnswers();
+  quizScore = 0;
+  const detailsContainer = document.getElementById("bilan-quiz-list");
+  detailsContainer.innerHTML = "";
+
+  quizQuestions.forEach((q, idx) => {
+    const user = quizAnswers[q.id] || [];
+    const correctOptions = q.bonneReponse.map((index) => q.options[index]);
+    const isCorrect =
+      user.length === correctOptions.length &&
+      user.every((u) => correctOptions.includes(u));
+
+    if (isCorrect) quizScore += q.points;
+
+    const item = document.createElement("div");
+    item.className = "bilan-item";
+    item.innerHTML = `
+      <div class="bilan-item-header">
+        <span class="bilan-question-label">Q${idx + 1}</span>
+        <span class="bilan-result ${isCorrect ? "ok" : "ko"}">
+          ${isCorrect ? "Correct" : "Incorrect"}
+        </span>
+      </div>
+      <p class="bilan-question-text">${q.question}</p>
+      <p class="bilan-answer"><strong>Votre réponse :</strong> ${
+        user.length ? user.join(", ") : "Aucune"
+      }</p>
+      <p class="bilan-answer"><strong>Bonne réponse :</strong> ${correctOptions.join(", ")}</p>
+    `;
+    detailsContainer.appendChild(item);
+  });
+
+  updateBilanScores();
+}
+
+// Collecte réponses évaluation
+function collectCurrentEvalAnswer() {
+  const ex = evalExercises[currentEvalIndex];
+  const container = document.querySelector(".eval-exercise");
+  if (!container) return;
+
+  let answer = null;
+
+  if (ex.type === "tableau-menu") {
+    answer = [];
+    const selects = container.querySelectorAll(".eval-select");
+    selects.forEach((sel) => {
+      answer.push(sel.value || "");
+    });
+  } else if (ex.type === "choix-unique" || ex.type === "choix-multiple") {
+    answer = [];
+    const inputs = container.querySelectorAll("input");
+    inputs.forEach((inp) => {
+      if (inp.checked) answer.push(inp.value);
+    });
+  } else if (ex.type === "valeur-numerique") {
+    const inp = container.querySelector(".eval-input-number");
+    answer = inp && inp.value !== "" ? parseFloat(inp.value) : null;
+  } else if (ex.type === "reponse-saisie") {
+    const inp = container.querySelector(".eval-input-text");
+    answer = inp ? inp.value : "";
+  } else if (ex.type === "association") {
+    answer = [];
+    const selects = container.querySelectorAll(".eval-select");
+    selects.forEach((sel) => {
+      answer.push(sel.value || "");
+    });
+  } else if (
+    ex.type === "texte-trous-libre" ||
+    ex.type === "texte-trous-liste-unique" ||
+    ex.type === "texte-trous-liste-variable"
+  ) {
+    answer = [];
+    const blanks = container.querySelectorAll(".eval-blank");
+    blanks.forEach((b) => {
+      answer.push(b.value || "");
+    });
+  }
+
+  evalAnswers[ex.id] = answer;
+}
+
+// Correction évaluation
+function computeEvalScore() {
+  evalScore = 0;
+  const detailsContainer = document.getElementById("bilan-eval-list");
+  detailsContainer.innerHTML = "";
+
+  evalExercises.forEach((ex, idx) => {
+    const user = evalAnswers[ex.id];
+    let gained = 0;
+    let isCorrect = false;
+
+    if (ex.type === "tableau-menu") {
+      if (user && user.length === ex.tableau.length) {
+        let allGood = true;
+        ex.tableau.forEach((row, i) => {
+          if (user[i] !== row.bonneReponse) allGood = false;
+        });
+        if (allGood) gained = ex.points;
+        isCorrect = allGood;
+      }
+    } else if (ex.type === "choix-unique" || ex.type === "choix-multiple") {
+      const correctOptions = ex.bonneReponse.map((index) => ex.options[index]);
+      if (user && user.length === correctOptions.length && user.every((u) => correctOptions.includes(u))) {
+        gained = ex.points;
+        isCorrect = true;
+      }
+    } else if (ex.type === "valeur-numerique") {
+      if (user !== null && user === ex.bonneReponse) {
+        gained = ex.points;
+        isCorrect = true;
+      }
+    } else if (ex.type === "reponse-saisie") {
+      const normUser = normalizeText(user);
+      const normCorrect = normalizeText(ex.bonneReponse);
+      if (normUser === normCorrect) {
+        gained = ex.points;
+        isCorrect = true;
+      }
+    } else if (ex.type === "association") {
+      if (user && user.length === ex.paires.length) {
+        let allGood = true;
+        ex.paires.forEach((pair, i) => {
+          if (user[i] !== pair.bonneReponse) allGood = false;
+        });
+        if (allGood) gained = ex.points;
+        isCorrect = allGood;
+      }
+    } else if (
+      ex.type === "texte-trous-libre" ||
+      ex.type === "texte-trous-liste-unique" ||
+      ex.type === "texte-trous-liste-variable"
+    ) {
+      if (user && user.length === ex.trous.length) {
+        let allGood = true;
+        ex.trous.forEach((trou, i) => {
+          const normUser = normalizeText(user[i]);
+          const normCorrect = normalizeText(trou.bonneReponse);
+          if (normUser !== normCorrect) allGood = false;
+        });
+        if (allGood) gained = ex.points;
+        isCorrect = allGood;
+      }
+    }
+
+    evalScore += gained;
+
+    const item = document.createElement("div");
+    item.className = "bilan-item";
+    const label = `E${idx + 1}`;
+    let questionText = ex.question || ex.intitule || ex.texte;
+
+    item.innerHTML = `
+      <div class="bilan-item-header">
+        <span class="bilan-question-label">${label}</span>
+        <span class="bilan-result ${isCorrect ? "ok" : "ko"}">
+          ${isCorrect ? `Correct (+${gained} pts)` : `Incorrect (+${gained} pts)`}
+        </span>
+      </div>
+      <p class="bilan-question-text">${questionText}</p>
+      <p class="bilan-answer"><strong>Votre réponse :</strong> ${
+        user == null
+          ? "Aucune"
+          : Array.isArray(user)
+          ? user.join(", ")
+          : user.toString()
+      }</p>
+    `;
+    detailsContainer.appendChild(item);
+  });
+
+  updateBilanScores();
+}
+
+// Bilan global
+function updateBilanScores() {
+  document.getElementById("bilan-quiz-score").textContent = quizScore;
+  document.getElementById("bilan-eval-score").textContent = evalScore;
+  const total = quizScore + evalScore;
+  document.getElementById("bilan-total-score").textContent = total;
+
+  let mention = "À consolider";
+  if (total >= 50) mention = "Excellent";
+  else if (total >= 45) mention = "Très bien";
+  else if (total >= 35) mention = "Bien";
+  else if (total >= 25) mention = "Passable";
+
+  document.getElementById("bilan-mention").textContent = mention;
+}
+
+// Navigation
+function showSection(id) {
+  document.querySelectorAll(".section").forEach((sec) => sec.classList.add("hidden"));
+  document.getElementById(id).classList.remove("hidden");
+}
+
+// PDF
+function downloadPDF() {
+  const element = document.getElementById("bilan-zone");
+  const opt = {
+    margin: 10,
+    filename: `bilan_module2_${new Date().toISOString().replace(/[:.]/g, "-")}.pdf`,
+    image: { type: "jpeg", quality: 0.98 },
+    html2canvas: { scale: 2 },
+    jsPDF: { unit: "mm", format: "a4", orientation: "portrait" }
+  };
+  html2pdf().set(opt).from(element).save();
+}
+
+// Restart
+function restartSession() {
+  clearInterval(quizTimer);
+  clearInterval(evalTimer);
+  quizAnswers = {};
+  evalAnswers = {};
+  quizScore = 0;
+  evalScore = 0;
+  document.getElementById("bilan-quiz-list").innerHTML = "";
+  document.getElementById("bilan-eval-list").innerHTML = "";
+  initQuiz();
+  initEvaluation();
+  showSection("section-cours");
+}
+
+// Événements
+document.addEventListener("DOMContentLoaded", () => {
+  loadData();
+
+  document.getElementById("start-quiz-btn").addEventListener("click", () => {
+    showSection("section-quiz");
+    startQuizTimer();
+  });
+
+  document.getElementById("submit-quiz-btn").addEventListener("click", () => {
+    clearInterval(quizTimer);
+    computeQuizScore();
+    showSection("section-eval");
+    resetEvalTimer();
+  });
+
+  document.getElementById("eval-prev-btn").addEventListener("click", () => {
+    collectCurrentEvalAnswer();
+    if (currentEvalIndex > 0) {
+      currentEvalIndex--;
+      renderCurrentEval();
+    }
+  });
+
+  document.getElementById("eval-next-btn").addEventListener("click", () => {
+    collectCurrentEvalAnswer();
+    if (currentEvalIndex < evalExercises.length - 1) {
+      currentEvalIndex++;
+      renderCurrentEval();
+    } else {
+      clearInterval(evalTimer);
+      computeEvalScore();
+      showSection("section-bilan");
+    }
+  });
+
+  document.getElementById("download-pdf-btn").addEventListener("click", downloadPDF);
+
+  document.getElementById("restart-btn").addEventListener("click", () => {
+    restartSession();
+  });
+
+  // Feedback visuel sur sélection
+  document.body.addEventListener("change", (e) => {
+    if (e.target.matches("input[type='radio'], input[type='checkbox'], select")) {
+      const label = e.target.closest("label, td, .eval-text-blanks");
+      if (label) {
+        label.classList.add("selected");
+      }
+      updateQuizProgress();
+    }
+  });
 });
-
-function terminerQuiz() {
-    clearInterval(timerQuiz);
-    $('#section-quiz').classList.add('hidden');
-    $('#section-eval').classList.remove('hidden');
-    evalIndex = 0;
-    scoreEval = 0;
-    detailsEval = [];
-    afficherExerciceEval();
-}
-
-// ========== ATELIER PRATIQUE / EXERCICES ==========
-function preparerEval() {
-    evalQuestions = shuffle(data.evaluation);
-    $('#btn-suivant-eval').addEventListener('click', () => validerEtSuivantEval());
-}
-
-function afficherExerciceEval() {
-    if (evalIndex >= evalQuestions.length) { terminerEval(); return; }
-    const ex = evalQuestions[evalIndex];
-    $('#eval-progress').textContent = `Exercice ${evalIndex + 1} / ${evalQuestions.length}`;
-    $('#eval-progress-bar').style.width = `${(evalIndex / evalQuestions.length) * 100}%`;
-    
-    let badge = ex.niveau === 'Facile' ? '<span class="badge badge-facile">Facile</span>' :
-                ex.niveau === 'Moyen' ? '<span class="badge badge-moyen">Moyen</span>' :
-                '<span class="badge badge-avance">Avancé</span>';
-    
-    $('#eval-question').innerHTML = `<strong>${ex.titre}</strong> ${badge}<br><br>${ex.enonce}`;
-    const content = $('#eval-content');
-    content.innerHTML = '';
-    
-    const renderers = {
-        'tableau-menu': renderTableauMenu,
-        'choix-unique': renderChoixUnique,
-        'choix-multiple': renderChoixMultiple,
-        'valeur-numerique': renderValeurNumerique,
-        'reponse-saisie': renderReponseSaisie,
-        'association': renderAssociation,
-        'texte-trous-libre': renderTexteTrousLibre,
-        'texte-trous-liste-unique': renderTexteTrousListeUnique,
-        'texte-trous-liste-variable': renderTexteTrousListeVariable
-    };
-    
-    if (renderers[ex.type]) renderers[ex.type](ex, content);
-    lancerTimerEval();
-}
-
-function lancerTimerEval() {
-    clearInterval(timerEval);
-    let tempsRestant = 90;
-    const t = $('#eval-timer');
-    t.textContent = `⏱️ ${formatTemps(tempsRestant)}`;
-    t.classList.remove('warning');
-    timerEval = setInterval(() => {
-        tempsRestant--;
-        t.textContent = `⏱️ ${formatTemps(tempsRestant)}`;
-        if (tempsRestant < 10) t.classList.add('warning');
-        if (tempsRestant <= 0) { clearInterval(timerEval); validerEtSuivantEval(); }
-    }, 1000);
-}
-
-// Rendu interactif des types d'exercices
-function renderTableauMenu(ex, container) {
-    const table = document.createElement('table');
-    table.className = 'tableau-menu';
-    table.innerHTML = `<thead><tr><th>N°</th><th>Énoncé</th><th>Réponse</th></tr></thead>`;
-    const tbody = document.createElement('tbody');
-    shuffle([...ex.questions]).forEach((q, i) => {
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td class="num">${i+1}</td><td>${q.enonce}</td><td></td>`;
-        const select = document.createElement('select');
-        select.dataset.questionId = q.id;
-        select.dataset.pts = q.pts;
-        select.innerHTML = '<option value="">-- Choisir --</option>';
-        shuffle([...q.options]).forEach(opt => {
-            const o = document.createElement('option');
-            o.value = opt.texte;
-            o.dataset.correct = opt.correct;
-            o.textContent = opt.texte;
-            select.appendChild(o);
-        });
-        tr.cells[2].appendChild(select);
-        tbody.appendChild(tr);
-    });
-    table.appendChild(tbody);
-    container.appendChild(table);
-}
-
-function renderChoixUnique(ex, container) {
-    shuffle([...ex.options]).forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option-item';
-        div.innerHTML = `<input type="radio" name="choix-unique" id="cu${i}" value="${i}"><label for="cu${i}">${opt.texte}</label>`;
-        div.addEventListener('click', () => {
-            $$('#eval-content .option-item').forEach(el => el.classList.remove('selected'));
-            div.classList.add('selected');
-            div.querySelector('input').checked = true;
-        });
-        container.appendChild(div);
-    });
-}
-
-function renderChoixMultiple(ex, container) {
-    shuffle([...ex.options]).forEach((opt, i) => {
-        const div = document.createElement('div');
-        div.className = 'option-item';
-        div.innerHTML = `<input type="checkbox" id="cm${i}" value="${i}"><label for="cm${i}">${opt.texte}</label>`;
-        div.addEventListener('click', (e) => {
-            if (e.target.tagName !== 'INPUT') div.querySelector('input').checked = !div.querySelector('input').checked;
-            div.classList.toggle('selected', div.querySelector('input').checked);
-        });
-        container.appendChild(div);
-    });
-}
-
-function renderValeurNumerique(ex, container) {
-    container.innerHTML = `<input type="text" class="reponse-saisie-input" id="valeur-numerique-input" placeholder="Saisis ta réponse numérique...">`;
-}
-
-function renderReponseSaisie(ex, container) {
-    container.innerHTML = `<input type="text" class="reponse-saisie-input" id="reponse-saisie-input" placeholder="Saisis ta réponse...">`;
-}
-
-function renderAssociation(ex, container) {
-    const div = document.createElement('div');
-    div.className = 'association-container';
-    const col = document.createElement('div');
-    col.className = 'association-colonne';
-    col.innerHTML = '<h4>Associe chaque terme à sa correspondance :</h4>';
-    const defs = shuffle(ex.associations.map(a => a.definition));
-    shuffle([...ex.associations]).forEach(asso => {
-        const item = document.createElement('div');
-        item.className = 'association-item';
-        item.dataset.terme = asso.terme;
-        item.dataset.pts = asso.pts;
-        let selectHTML = `<strong>${asso.terme}</strong><select><option value="">-- Choisir --</option>`;
-        defs.forEach(d => { selectHTML += `<option value="${d}">${d}</option>`; });
-        selectHTML += '</select>';
-        item.innerHTML = selectHTML;
-        col.appendChild(item);
-    });
-    div.appendChild(col);
-    container.appendChild(div);
-}
-
-function renderTexteTrousLibre(ex, container) {
-    const div = document.createElement('div');
-    div.className = 'texte-trous';
-    const inputsHTML = ex.trous.map((trou, i) =>
-        `<input type="text" data-trou-index="${i}" data-pts="${trou.pts}" placeholder="..." class="trou-input">`
-    );
-    div.innerHTML = remplacerTrous(ex.texte, inputsHTML);
-    container.appendChild(div);
-}
-
-function renderTexteTrousListeUnique(ex, container) {
-    const div = document.createElement('div');
-    div.className = 'texte-trous';
-    const selectsHTML = ex.trous.map((trou, i) => {
-        let opts = '<option value="">--</option>';
-        ex.listeCommune.forEach(item => { opts += `<option value="${item}">${item}</option>`; });
-        return `<select data-trou-index="${i}" data-pts="${trou.pts}" class="trou-select">${opts}</select>`;
-    });
-    div.innerHTML = remplacerTrous(ex.texte, selectsHTML);
-    container.appendChild(div);
-}
-
-function renderTexteTrousListeVariable(ex, container) {
-    const div = document.createElement('div');
-    div.className = 'texte-trous';
-    const selectsHTML = ex.trous.map((trou, i) => {
-        let opts = '<option value="">--</option>';
-        trou.liste.forEach(item => { opts += `<option value="${item}">${item}</option>`; });
-        return `<select data-trou-index="${i}" data-pts="${trou.pts}" class="trou-select">${opts}</select>`;
-    });
-    div.innerHTML = remplacerTrous(ex.texte, selectsHTML);
-    container.appendChild(div);
-}
-
-// ========== VALIDATION DES RÉPONSES ==========
-function validerEtSuivantEval() {
-    clearInterval(timerEval);
-    const ex = evalQuestions[evalIndex];
-    let pts = 0;
-    const details = { titre: ex.titre, niveau: ex.niveau, questions: [] };
-
-    if (ex.type === 'tableau-menu') {
-        $$('#eval-content select').forEach(select => {
-            const qId = select.dataset.questionId;
-            const qPts = parseFloat(select.dataset.pts);
-            const selOpt = select.options[select.selectedIndex];
-            const correct = selOpt && selOpt.dataset.correct === 'true';
-            if (correct) pts += qPts;
-            const qData = ex.questions.find(q => q.id === qId);
-            details.questions.push({ enonce: qData.enonce, reponseEleve: select.value || 'Aucune', bonneReponse: qData.options.find(o => o.correct).texte, correct, pts: correct ? qPts : 0 });
-        });
-    }
-    else if (ex.type === 'choix-unique') {
-        const sel = document.querySelector('input[name="choix-unique"]:checked');
-        if (sel) {
-            const opt = ex.options[parseInt(sel.value)];
-            if (opt.correct) pts += opt.pts;
-            details.questions.push({ enonce: ex.enonce, reponseEleve: opt.texte, bonneReponse: ex.options.find(o => o.correct).texte, correct: opt.correct, pts: opt.correct ? opt.pts : 0 });
-        }
-    }
-    else if (ex.type === 'choix-multiple') {
-        $$('#eval-content input[type="checkbox"]').forEach(cb => {
-            const opt = ex.options[parseInt(cb.value)];
-            const coche = cb.checked;
-            if (coche && opt.correct) pts += opt.pts;
-            details.questions.push({ enonce: opt.texte, reponseEleve: coche ? 'Coché' : 'Non coché', bonneReponse: opt.correct ? 'Coché' : 'Non coché', correct: coche === opt.correct, pts: (coche && opt.correct) ? opt.pts : 0 });
-        });
-    }
-    else if (ex.type === 'valeur-numerique') {
-        const val = ($('#valeur-numerique-input').value || '').replace(/\s/g, '').replace(',', '.');
-        const correct = ex.bonnesReponses.some(r => r.replace(/\s/g, '').replace(',', '.') === val);
-        if (correct) pts += ex.pts;
-        details.questions.push({ enonce: ex.enonce, reponseEleve: val || 'Aucune', bonneReponse: ex.bonnesReponses[0], correct, pts: correct ? ex.pts : 0 });
-    }
-    else if (ex.type === 'reponse-saisie') {
-        const val = normaliserTexte($('#reponse-saisie-input').value || '', ex.ignorerCasse, ex.ignorerAccents);
-        const correct = ex.bonnesReponses.some(r => normaliserTexte(r, ex.ignorerCasse, ex.ignorerAccents) === val);
-        if (correct) pts += ex.pts;
-        details.questions.push({ enonce: ex.enonce, reponseEleve: val || 'Aucune', bonneReponse: ex.bonnesReponses[0], correct, pts: correct ? ex.pts : 0 });
-    }
-    else if (ex.type === 'association') {
-        $$('#eval-content .association-item').forEach(item => {
-            const terme = item.dataset.terme;
-            const ptsA = parseFloat(item.dataset.pts);
-            const val = item.querySelector('select').value;
-            const correct = val === ex.associations.find(a => a.terme === terme).definition;
-            if (correct) pts += ptsA;
-            details.questions.push({ enonce: terme, reponseEleve: val || 'Aucune', bonneReponse: ex.associations.find(a => a.terme === terme).definition, correct, pts: correct ? ptsA : 0 });
-        });
-    }
-    else if (ex.type === 'texte-trous-libre') {
-        $$('#eval-content input[data-trou-index]').forEach(input => {
-            const idx = parseInt(input.dataset.trouIndex);
-            const ptsT = parseFloat(input.dataset.pts);
-            const trou = ex.trous[idx];
-            const val = normaliserTexte(input.value || '', true, true);
-            const correct = trou.bonnesReponses.some(r => normaliserTexte(r, true, true) === val);
-            if (correct) pts += ptsT;
-            details.questions.push({ enonce: `Trou ${idx+1}`, reponseEleve: input.value || 'Aucune', bonneReponse: trou.bonnesReponses[0], correct, pts: correct ? ptsT : 0 });
-        });
-    }
-    else if (ex.type === 'texte-trous-liste-unique' || ex.type === 'texte-trous-liste-variable') {
-        $$('#eval-content select[data-trou-index]').forEach(select => {
-            const idx = parseInt(select.dataset.trouIndex);
-            const ptsT = parseFloat(select.dataset.pts);
-            const trou = ex.trous[idx];
-            const val = select.value;
-            const correct = val === trou.bonneReponse;
-            if (correct) pts += ptsT;
-            details.questions.push({ enonce: `Trou ${idx+1}`, reponseEleve: val || 'Aucune', bonneReponse: trou.bonneReponse, correct, pts: correct ? ptsT : 0 });
-        });
-    }
-
-    scoreEval += pts;
-    details.points = Math.round(pts * 10) / 10;
-    let totalP = 0;
-    if (ex.type === 'tableau-menu') totalP = ex.questions.reduce((s,q) => s+q.pts, 0);
-    else if (ex.type === 'association') totalP = ex.associations.reduce((s,a) => s+a.pts, 0);
-    else if (ex.trous) totalP = ex.trous.reduce((s,t) => s+t.pts, 0);
-    else if (ex.pts) totalP = ex.pts;
-    else if (ex.options) totalP = ex.options.reduce((s,o) => s+(o.pts||0), 0);
-    details.totalPossible = totalP;
-    detailsEval.push(details);
-    evalIndex++;
-    afficherExerciceEval();
-}
-
-function terminerEval() {
-    $('#section-eval').classList.add('hidden');
-    afficherResultats();
-}
-
-// ========== RESULTATS & PDF ==========
-function afficherResultats() {
-    const zone = $('#pdf-report-area');
-    zone.classList.remove('hidden');
-    const totalQuiz = quizQuestions.length;
-    const totalEval = 40;
-    const total = scoreQuiz + scoreEval;
-    const mention = total >= 36 ? '🏆 Excellent' : total >= 28 ? '👍 Très bien' : total >= 20 ? '✅ Bien' : total >= 12 ? '📚 À renforcer' : '⚠️ À retravailler';
-    
-    let html = `<div class="score-final">🎯 Bilan Module 2 : ${total.toFixed(1)} / ${totalQuiz + totalEval} pts<br><small>Théorie/Quiz : ${scoreQuiz}/${totalQuiz} | Pratique/Exercices : ${scoreEval.toFixed(1)}/${totalEval}</small><br><small>${mention}</small></div>`;
-    html += `<div class="resultat-section"><h3>📋 Restitution - Partie Théorique (Quiz)</h3>`;
-    detailsQuiz.forEach((d, i) => {
-        html += `<div class="detail-exercice ${d.correct ? '' : 'erreur'}"><strong>Q${i+1}.</strong> ${d.question}<br>${d.correct ? '✅ Bonne réponse' : `❌ "${d.reponseEleve}" → Attendu : "${d.bonneReponse}"`}</div>`;
-    });
-    html += `</div><div class="resultat-section"><h3>📝 Restitution - Partie Exercices Pratiques</h3>`;
-    detailsEval.forEach(d => {
-        const nb = d.questions.filter(q => q.correct).length;
-        const ok = nb === d.questions.length;
-        html += `<div class="detail-exercice ${ok ? '' : 'erreur'}"><strong>${d.titre}</strong> — ${d.points}/${d.totalPossible} pts (${nb}/${d.questions.length})<br>`;
-        d.questions.forEach(q => {
-            html += `<div class="detail-question ${q.correct ? 'bonne' : 'mauvaise'}">${q.correct ? '✅' : '❌'} ${q.enonce} — ${q.correct ? q.reponseEleve : `"${q.reponseEleve}" → "${q.bonneReponse}"`}</div>`;
-        });
-        html += `</div>`;
-    });
-    html += `</div>`;
-    $('#resultats-detail').innerHTML = html;
-    zone.scrollIntoView({ behavior: 'smooth' });
-}
-
-function genererPDFResultats() {
-    const el = $('#pdf-report-area');
-    el.classList.remove('hidden');
-    el.style.display = 'block';
-    setTimeout(() => {
-        html2pdf().set({
-            margin: [10,10,10,10],
-            filename: `Bilan_Module2_Analyse_Du_Besoin_${new Date().toISOString().slice(0,10)}.pdf`,
-            image: { type: 'jpeg', quality: 0.98 },
-            html2canvas: { scale: 2, useCORS: true, backgroundColor: '#ffffff', windowWidth: 960 },
-            jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' },
-            pagebreak: { mode: ['avoid-all','css','legacy'] }
-        }).from(el).save();
-    }, 100);
-}
-
-$('#btn-telecharger-pdf').addEventListener('click', genererPDFResultats);
-$('#btn-recommencer').addEventListener('click', () => location.reload());
-document.addEventListener('DOMContentLoaded', chargerDonnees);
