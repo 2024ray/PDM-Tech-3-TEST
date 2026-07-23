@@ -1,1 +1,380 @@
 
+{
+  "cours": {
+    "introduction": "Ce module vous guide dans l'analyse du besoin, étape fondamentale qui permet de transformer une demande souvent floue en un besoin formulé, compris et exploitable. Vous allez apprendre à identifier les acteurs, formaliser les attentes, distinguer les fonctions attendues des contraintes, puis traduire l'ensemble dans un Cahier des Charges Fonctionnel (CDCF). L'objectif est de passer d'une idée générale à une expression rigoureuse, vérifiable et partagée par tous les intervenants.",
+    "sections": [
+      {
+        "titre": "1. Formulation du besoin",
+        "contenu": "L'analyse du besoin commence toujours par la compréhension du contexte. Il faut identifier pourquoi le projet existe, quel problème il cherche à résoudre, et qui sont les utilisateurs ou bénéficiaires concernés. On distingue le besoin exprimé, souvent formulé de manière intuitive, du besoin réel, qui doit être clarifié par une investigation méthodique. Cette étape passe par des entretiens, observations, reformulations et validation progressive des informations collectées. Le résultat attendu est une description claire, concise et stable du besoin."
+      },
+      {
+        "titre": "2. Bête à cornes et diagramme pieuvre",
+        "contenu": "La bête à cornes est un outil simple qui aide à formuler le besoin en répondant à trois questions : à qui rend-on service, sur quoi agit-on, dans quel but ? Elle permet de cadrer rapidement le projet. Le diagramme pieuvre, lui, sert à identifier les interactions entre le système et son environnement. On y recense les éléments externes qui influencent le système ou sont influencés par lui : utilisateur, énergie, sécurité, réglementation, conditions d'utilisation, maintenance, coût, environnement, etc. Ces deux outils aident à structurer la réflexion avant d'entrer dans la rédaction du CDCF."
+      },
+      {
+        "titre": "3. Le CDCF",
+        "contenu": "Le Cahier des Charges Fonctionnel formalise les fonctions de service attendues d'un produit ou d'un système ainsi que les contraintes à respecter. Il ne décrit pas la solution technique, mais les services rendus à l'utilisateur. Chaque fonction doit être formulée de manière vérifiable et associée à des critères d'appréciation, des niveaux attendus et des flexibilité éventuelles. Le CDCF sert de référence commune pour concevoir, choisir, développer et évaluer une solution. Il sécurise la communication entre le client, le concepteur et les autres parties prenantes."
+      },
+      {
+        "titre": "4. Déroulement de la séance",
+        "contenu": "La séance suit une progression logique : d'abord l'apport de cours pour installer les notions, ensuite un quiz de compréhension pour vérifier l'acquisition des bases, puis un atelier pratique pour mobiliser les méthodes sur des situations concrètes. Enfin, un bilan détaillé permet de mesurer la maîtrise des contenus et d'identifier les points à retravailler. Cette organisation favorise l'autonomie, la consolidation des connaissances et la montée en compétence progressive."
+      }
+    ]
+  },
+  "quizComprehension": [
+    {
+      "question": "Quel est l'objectif principal de l'analyse du besoin ?",
+      "choices": [
+        "Choisir immédiatement une solution technique",
+        "Comprendre, clarifier et formaliser le besoin",
+        "Réduire le coût du projet uniquement",
+        "Dessiner le prototype final"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "La bête à cornes permet de répondre à quelle logique ?",
+      "choices": [
+        "Qui fabrique le produit ?",
+        "À qui rend-on service, sur quoi agit-on, dans quel but ?",
+        "Quels matériaux utiliser ?",
+        "Quel est le planning détaillé ?"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le diagramme pieuvre sert à :",
+      "choices": [
+        "Comparer les coûts des fournisseurs",
+        "Identifier les interactions du système avec son environnement",
+        "Créer un logo pour le projet",
+        "Calculer la durée de fabrication"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le CDCF décrit principalement :",
+      "choices": [
+        "Les fonctions de service et les contraintes",
+        "La liste des pièces du produit",
+        "Le budget de l'entreprise",
+        "Le code source d'une application"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Une fonction de service doit être :",
+      "choices": [
+        "Ambiguë pour laisser de la liberté",
+        "Vérifiable et formulée clairement",
+        "Exclusivement technique",
+        "Longue et détaillée sans limite"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le besoin réel est :",
+      "choices": [
+        "Toujours identique au besoin exprimé",
+        "La version clarifiée après analyse",
+        "Une idée de solution",
+        "Un document juridique"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le diagramme pieuvre permet de repérer :",
+      "choices": [
+        "Uniquement les couleurs du produit",
+        "Les éléments externes en interaction avec le système",
+        "Le nom des concurrents",
+        "Le plan de financement"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le CDCF doit éviter de :",
+      "choices": [
+        "Parler des besoins utilisateurs",
+        "Décrire une solution technique trop tôt",
+        "Préciser des critères de validation",
+        "Lister des contraintes"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Une contrainte dans le CDCF est :",
+      "choices": [
+        "Une liberté de conception",
+        "Une obligation à respecter",
+        "Une option décorative",
+        "Un synonyme de coût"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "La reformulation du besoin sert à :",
+      "choices": [
+        "Rendre la demande plus confuse",
+        "Valider la compréhension avec les acteurs",
+        "Éviter les échanges",
+        "Choisir directement le matériau"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le premier travail du concepteur consiste à :",
+      "choices": [
+        "Dessiner la solution finale",
+        "Comprendre le contexte et le problème",
+        "Acheter les composants",
+        "Programmer l'interface"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Le CDCF est utile parce qu'il :",
+      "choices": [
+        "Remplace totalement l'analyse du besoin",
+        "Partage une base commune entre les acteurs",
+        "Interdit toute évolution",
+        "Ne concerne que la fabrication"
+      ],
+      "answer": 1
+    },
+    {
+      "question": "Une fonction bien écrite est :",
+      "choices": [
+        "Mesurable",
+        "Floue",
+        "Subjective",
+        "Incomplète"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "Le besoin exprimé correspond :",
+      "choices": [
+        "À ce qui est dit spontanément par le demandeur",
+        "À la solution technique choisie",
+        "Au résultat final du projet",
+        "Au coût de production"
+      ],
+      "answer": 0
+    },
+    {
+      "question": "La séance est organisée pour :",
+      "choices": [
+        "Aller du cours vers la pratique puis le bilan",
+        "Commencer par le bilan puis finir par le cours",
+        "Supprimer les exercices",
+        "Éviter l'évaluation"
+      ],
+      "answer": 0
+    }
+  ],
+  "evaluation": [
+    {
+      "type": "choix-unique",
+      "niveau": "Facile",
+      "points": 2,
+      "titre": "Identifier la finalité",
+      "consigne": "Quel est le premier objectif de l'analyse du besoin ?",
+      "choices": [
+        "Choisir la solution technique la plus esthétique",
+        "Comprendre et formaliser le besoin",
+        "Acheter les composants",
+        "Dessiner le produit final"
+      ],
+      "answer": 1
+    },
+    {
+      "type": "valeur-numerique",
+      "niveau": "Facile",
+      "points": 2,
+      "titre": "Nombre de questions",
+      "consigne": "Combien de questions comporte le quiz de compréhension ?",
+      "answer": 15
+    },
+    {
+      "type": "reponse-saisie",
+      "niveau": "Facile",
+      "points": 2,
+      "titre": "Acronyme",
+      "consigne": "Complétez : Cahier des Charges Fonctionnel = ____",
+      "answer": "cdcf"
+    },
+    {
+      "type": "texte-trous-libre",
+      "niveau": "Facile",
+      "points": 2,
+      "titre": "Phrase clé",
+      "consigne": "Complétez la phrase : Le CDCF décrit les fonctions de service et les ____.",
+      "answer": ["contraintes"]
+    },
+    {
+      "type": "choix-multiple",
+      "niveau": "Moyen",
+      "points": 3,
+      "titre": "Outils d'analyse",
+      "consigne": "Sélectionnez les outils associés à l'analyse du besoin.",
+      "choices": [
+        "Bête à cornes",
+        "Diagramme pieuvre",
+        "Tableur comptable",
+        "CDCF"
+      ],
+      "answer": [0, 1, 3]
+    },
+    {
+      "type": "association",
+      "niveau": "Moyen",
+      "points": 3,
+      "titre": "Associer les notions",
+      "consigne": "Associez chaque notion à sa définition.",
+      "pairs": [
+        {
+          "left": "Besoin exprimé",
+          "right": "Demande formulée initialement par l'utilisateur"
+        },
+        {
+          "left": "Besoin réel",
+          "right": "Besoin clarifié après analyse"
+        },
+        {
+          "left": "Contrainte",
+          "right": "Exigence à respecter"
+        }
+      ]
+    },
+    {
+      "type": "tableau-menu",
+      "niveau": "Moyen",
+      "points": 3,
+      "titre": "Compléter le tableau",
+      "consigne": "Choisissez la bonne catégorie pour chaque élément.",
+      "rows": [
+        {
+          "label": "Sécurité",
+          "choices": ["Fonction de service", "Contrainte", "Solution technique"],
+          "answer": 1
+        },
+        {
+          "label": "Rendre service à l'utilisateur",
+          "choices": ["Fonction de service", "Contrainte", "Coût"],
+          "answer": 0
+        },
+        {
+          "label": "Compatibilité réglementaire",
+          "choices": ["Contrainte", "Prototype", "Planification"],
+          "answer": 0
+        }
+      ]
+    },
+    {
+      "type": "texte-trous-liste-unique",
+      "niveau": "Moyen",
+      "points": 3,
+      "titre": "Texte à trous guidé",
+      "consigne": "Complétez : La bête à cornes répond à trois questions : à qui rend-on ____, sur quoi agit-on, dans quel ____ ?",
+      "answer": ["service", "but"]
+    },
+    {
+      "type": "texte-trous-liste-variable",
+      "niveau": "Moyen",
+      "points": 3,
+      "titre": "Mots attendus",
+      "consigne": "Citez deux éléments externes du diagramme pieuvre.",
+      "answer": ["utilisateur", "énergie", "sécurité", "réglementation", "maintenance", "environnement", "coût"]
+    },
+    {
+      "type": "choix-unique",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Formulation correcte",
+      "consigne": "Quelle formulation correspond le mieux à une fonction de service ?",
+      "choices": [
+        "Le produit doit être bleu",
+        "Le système doit permettre à l'utilisateur de ranger ses objets de manière sécurisée",
+        "Le système sera fabriqué en plastique",
+        "Le produit coûtera moins de 20 euros"
+      ],
+      "answer": 1
+    },
+    {
+      "type": "reponse-saisie",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Terme central",
+      "consigne": "Quel document formalise les fonctions de service et les contraintes ?",
+      "answer": "cdcf"
+    },
+    {
+      "type": "choix-multiple",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Qualités d'une fonction",
+      "consigne": "Sélectionnez les qualités d'une fonction bien formulée.",
+      "choices": [
+        "Vérifiable",
+        "Claire",
+        "Floue",
+        "Mesurable"
+      ],
+      "answer": [0, 1, 3]
+    },
+    {
+      "type": "association",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Étapes du travail",
+      "consigne": "Associez chaque étape à son rôle.",
+      "pairs": [
+        {
+          "left": "Observer",
+          "right": "Recueillir des informations sur l'usage réel"
+        },
+        {
+          "left": "Reformuler",
+          "right": "Vérifier la compréhension du besoin"
+        },
+        {
+          "left": "Formaliser",
+          "right": "Écrire le besoin et les exigences"
+        }
+      ]
+    },
+    {
+      "type": "tableau-menu",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Catégoriser les exigences",
+      "consigne": "Indiquez la bonne nature de chaque exigence.",
+      "rows": [
+        {
+          "label": "Résistance à l'eau",
+          "choices": ["Fonction de service", "Contrainte", "Critère d'appréciation"],
+          "answer": 1
+        },
+        {
+          "label": "Permettre le transport",
+          "choices": ["Fonction de service", "Contrainte", "Critère d'appréciation"],
+          "answer": 0
+        },
+        {
+          "label": "Temps d'utilisation inférieur à 10 s",
+          "choices": ["Fonction de service", "Contrainte", "Critère d'appréciation"],
+          "answer": 2
+        }
+      ]
+    },
+    {
+      "type": "texte-trous-libre",
+      "niveau": "Avancé",
+      "points": 4,
+      "titre": "Phrase finale",
+      "consigne": "Complétez : Le CDCF sert de référence commune pour concevoir, choisir et évaluer une ____.",
+      "answer": ["solution"]
+    }
+  ]
+}
