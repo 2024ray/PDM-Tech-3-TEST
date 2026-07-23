@@ -1,148 +1,318 @@
-<!-- index.html -->
-<!DOCTYPE html>
-<html lang="fr">
-<head>
-  <meta charset="UTF-8" />
-  <title>Module 2 – Analyse du Besoin & CDCF</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <!-- FontAwesome 6.4.0 -->
-  <link
-    rel="stylesheet"
-    href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
-    integrity="sha512-pIVpG8G3Kx1eJQ+ZqCkCmZJLdnOjFkWDXLI4YAlnXrhIRbkIuAeGHNirMRHkRkNvMNFVQVw1K7E3WZf2T2zYvw=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"
-  />
-  <link rel="stylesheet" href="style.css" />
-</head>
-<body>
-  <header class="main-header">
-    <div class="header-content">
-      <h1>Module 2 – Analyse du Besoin & CDCF</h1>
-      <p class="subtitle">Parcours Ingénierie des Besoins – Auto‑formation interactive</p>
-      <span class="badge">
-        <i class="fa-solid fa-id-badge"></i> Module 01mr durand01
-      </span>
-    </div>
-  </header>
+:root{
+  --bg:#f1f5f9;
+  --card:#ffffff;
+  --text:#0f172a;
+  --muted:#475569;
+  --primary:#7c3aed;
+  --secondary:#db2777;
+  --accent:#f97316;
+  --emerald:#10b981;
+  --amber:#f59e0b;
+  --cyan:#06b6d4;
+  --success:#dcfce7;
+  --focus:#8b5cf6;
+  --shadow:0 12px 30px rgba(15, 23, 42, .12);
+}
 
-  <main>
-    <!-- Section 1 : Cours -->
-    <section id="section-cours" class="section">
-      <h2><i class="fa-solid fa-book-open"></i> Cours – Apports théoriques</h2>
-      <div id="cours-grid" class="cours-grid"></div>
+*{box-sizing:border-box}
+body{
+  margin:0;
+  font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial,sans-serif;
+  background:var(--bg);
+  color:var(--text);
+}
 
-      <h3 class="timeline-title">
-        <i class="fa-solid fa-timeline"></i> Frise chronologique de la séance
-      </h3>
-      <div id="timeline" class="timeline"></div>
+.hero{
+  background:linear-gradient(135deg,var(--primary),var(--secondary),var(--accent));
+  color:#fff;
+  padding:48px 20px;
+}
+.hero__inner{
+  max-width:1200px;
+  margin:0 auto;
+}
+.hero__badge{
+  display:inline-block;
+  background:rgba(255,255,255,.2);
+  padding:8px 14px;
+  border-radius:999px;
+  font-weight:700;
+  margin-bottom:14px;
+}
+.hero h1{margin:0 0 10px;font-size:clamp(2rem,4vw,3.4rem)}
+.hero p{margin:0 0 22px;max-width:760px;font-size:1.05rem;opacity:.95}
+.hero__actions{display:flex;gap:12px;flex-wrap:wrap}
 
-      <div class="section-actions">
-        <button id="start-quiz-btn" class="btn primary">
-          <i class="fa-solid fa-play"></i> Lancer le quiz de compréhension
-        </button>
-      </div>
-    </section>
+.app{
+  max-width:1200px;
+  margin:0 auto;
+  padding:22px 18px 40px;
+}
 
-    <!-- Section 2 : Quiz -->
-    <section id="section-quiz" class="section hidden">
-      <h2><i class="fa-solid fa-circle-question"></i> Quiz de compréhension</h2>
+.steps{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:10px;
+  margin-bottom:18px;
+}
+.step,.btn{
+  border:0;
+  border-radius:14px;
+  padding:12px 16px;
+  font-weight:700;
+  cursor:pointer;
+}
+.step{
+  background:#e2e8f0;
+  color:var(--muted);
+}
+.step.active{background:var(--primary);color:#fff}
 
-      <div class="quiz-header">
-        <div class="timer" id="quiz-timer">
-          <i class="fa-solid fa-clock"></i> Temps restant : <span id="quiz-time-display">20:00</span>
-        </div>
-        <div class="progress-container">
-          <span>Progression</span>
-          <div class="progress-bar">
-            <div id="quiz-progress" class="progress-fill"></div>
-          </div>
-        </div>
-      </div>
+.panel{
+  background:var(--card);
+  border-radius:24px;
+  padding:22px;
+  box-shadow:var(--shadow);
+  margin-bottom:18px;
+}
+.panel__header,.panel__footer{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  flex-wrap:wrap;
+  align-items:center;
+}
+.panel__header h2{margin:0;font-size:1.4rem}
+.panel__footer{margin-top:18px}
 
-      <form id="quiz-form" class="quiz-form"></form>
+.btn{
+  display:inline-flex;
+  align-items:center;
+  gap:8px;
+}
+.btn--primary{background:var(--primary);color:#fff}
+.btn--secondary{background:#e2e8f0;color:#0f172a}
+.btn--accent{background:var(--accent);color:#fff}
+.btn:disabled{opacity:.45;cursor:not-allowed}
 
-      <div class="section-actions">
-        <button id="submit-quiz-btn" class="btn primary">
-          <i class="fa-solid fa-check"></i> Valider le quiz
-        </button>
-      </div>
-    </section>
+.course-intro{
+  margin:18px 0;
+  padding:18px;
+  background:#eef2ff;
+  border-left:5px solid var(--primary);
+  border-radius:16px;
+  line-height:1.7;
+}
 
-    <!-- Section 3 : Exercices pratiques -->
-    <section id="section-eval" class="section hidden">
-      <h2><i class="fa-solid fa-flask"></i> Exercices pratiques – Atelier</h2>
+.course-grid{
+  display:grid;
+  grid-template-columns:repeat(auto-fit,minmax(230px,1fr));
+  gap:14px;
+}
+.course-card{
+  border-radius:18px;
+  padding:18px;
+  background:#fff;
+  box-shadow:0 8px 18px rgba(15,23,42,.08);
+  line-height:1.65;
+}
+.course-card--0{border-top:5px solid var(--primary)}
+.course-card--1{border-top:5px solid var(--secondary)}
+.course-card--2{border-top:5px solid var(--emerald)}
+.course-card--3{border-top:5px solid var(--amber)}
+.course-card--4{border-top:5px solid var(--cyan)}
 
-      <p class="section-note">
-        15 exercices interactifs – Score total : 40 points – Chronomètre individuel de 90 secondes par exercice.
-      </p>
+.timeline-card{
+  margin-top:18px;
+  padding:18px;
+  border-radius:18px;
+  background:#f8fafc;
+}
+.timeline{
+  display:grid;
+  gap:12px;
+  margin-top:14px;
+}
+.timeline__item{
+  display:flex;
+  gap:12px;
+  align-items:flex-start;
+}
+.timeline__dot{
+  width:34px;
+  height:34px;
+  border-radius:50%;
+  background:linear-gradient(135deg,var(--primary),var(--secondary));
+  color:#fff;
+  display:grid;
+  place-items:center;
+  font-weight:800;
+  flex:0 0 auto;
+}
+.timeline__content{
+  padding:8px 0;
+  line-height:1.6;
+}
 
-      <div class="eval-header">
-        <div class="timer" id="eval-timer">
-          <i class="fa-solid fa-stopwatch"></i> Temps exercice : <span id="eval-time-display">01:30</span>
-        </div>
-        <div class="eval-index">
-          Exercice <span id="eval-current-index">1</span> / <span id="eval-total">15</span>
-        </div>
-      </div>
+.progress{
+  height:12px;
+  background:#e2e8f0;
+  border-radius:999px;
+  overflow:hidden;
+  margin:12px 0 16px;
+}
+.progress__bar{
+  width:0%;
+  height:100%;
+  background:linear-gradient(90deg,var(--primary),var(--secondary),var(--accent));
+  transition:width .25s ease;
+}
 
-      <div id="eval-container" class="eval-container"></div>
+.meta{color:var(--muted);margin-bottom:14px;font-weight:600}
+.quiz-container,.practice-container{display:grid;gap:16px}
+.question-card,.exercise-card,.report-card{
+  border-radius:20px;
+  background:#fff;
+  padding:20px;
+  border:1px solid #e2e8f0;
+}
+.choices{
+  display:grid;
+  gap:10px;
+  margin-top:16px;
+}
+.choice{
+  display:flex;
+  align-items:center;
+  gap:12px;
+  padding:12px 14px;
+  border-radius:14px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+}
+.choice input{accent-color:var(--primary)}
+.choice:has(input:checked){background:var(--success);border-color:#86efac}
 
-      <div class="section-actions eval-actions">
-        <button id="eval-prev-btn" class="btn secondary">
-          <i class="fa-solid fa-arrow-left"></i> Précédent
-        </button>
-        <button id="eval-next-btn" class="btn primary">
-          Suivant <i class="fa-solid fa-arrow-right"></i>
-        </button>
-      </div>
-    </section>
+.timer{
+  min-width:96px;
+  padding:10px 14px;
+  border-radius:999px;
+  font-weight:800;
+  color:#fff;
+  text-align:center;
+}
+.timer--global{background:var(--secondary)}
+.timer--exercise{background:var(--emerald)}
+.timer.warning,.exercise-timer-note.warning{
+  background:#ef4444 !important;
+  color:#fff;
+  animation:pulse 1s infinite;
+}
+.exercise-timer-note{
+  margin-top:14px;
+  padding:10px 12px;
+  border-radius:12px;
+  background:#f8fafc;
+  color:var(--muted);
+}
 
-    <!-- Section 4 : Bilan & Restitution -->
-    <section id="section-bilan" class="section hidden">
-      <h2><i class="fa-solid fa-chart-line"></i> Bilan & Restitution</h2>
+.text-input,.select-input{
+  width:100%;
+  margin-top:10px;
+  padding:12px 14px;
+  border-radius:14px;
+  border:2px solid var(--amber);
+  background:#fffbe2;
+  font-size:1rem;
+  outline:none;
+}
+.text-input:focus,.select-input:focus{
+  border-color:var(--focus);
+  box-shadow:0 0 0 4px rgba(139,92,246,.15);
+}
 
-      <div id="bilan-zone" class="bilan-zone">
-        <div class="bilan-summary">
-          <p><strong>Score quiz :</strong> <span id="bilan-quiz-score">0</span> / 15</p>
-          <p><strong>Score exercices :</strong> <span id="bilan-eval-score">0</span> / 40</p>
-          <p><strong>Note globale :</strong> <span id="bilan-total-score">0</span> / 55</p>
-          <p><strong>Mention :</strong> <span id="bilan-mention">–</span></p>
-        </div>
+.association,.table-box{margin-top:16px}
+.association__row{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+  margin-bottom:10px;
+}
+.association__left{
+  padding:12px 14px;
+  border-radius:14px;
+  background:#f8fafc;
+  border:1px solid #e2e8f0;
+  display:flex;
+  align-items:center;
+}
+table{
+  width:100%;
+  border-collapse:collapse;
+}
+th,td{
+  border:1px solid #e2e8f0;
+  padding:12px;
+  text-align:left;
+}
 
-        <div class="bilan-details">
-          <h3>Détail des réponses</h3>
-          <div id="bilan-details-quiz" class="bilan-block">
-            <h4><i class="fa-solid fa-list-check"></i> Quiz de compréhension</h4>
-            <div id="bilan-quiz-list"></div>
-          </div>
-          <div id="bilan-details-eval" class="bilan-block">
-            <h4><i class="fa-solid fa-flask-vial"></i> Exercices pratiques</h4>
-            <div id="bilan-eval-list"></div>
-          </div>
-        </div>
-      </div>
+.exercise-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  align-items:center;
+}
+.badge{
+  background:#e0e7ff;
+  color:#312e81;
+  padding:6px 10px;
+  border-radius:999px;
+  font-size:.85rem;
+  font-weight:800;
+}
+.points{
+  font-weight:800;
+  color:var(--accent);
+}
 
-      <div class="section-actions bilan-actions">
-        <button id="download-pdf-btn" class="btn primary">
-          <i class="fa-solid fa-file-pdf"></i> Télécharger le bilan en PDF
-        </button>
-        <button id="restart-btn" class="btn secondary">
-          <i class="fa-solid fa-rotate-right"></i> Recommencer la session
-        </button>
-      </div>
-    </section>
-  </main>
+.report-summary{
+  display:grid;
+  gap:10px;
+  justify-items:start;
+  margin-bottom:16px;
+}
+.report-score{font-size:2.5rem;font-weight:900}
+.report-mention{
+  padding:8px 12px;
+  background:#f1f5f9;
+  border-radius:12px;
+  font-weight:800;
+}
+.report-details ul{
+  margin:8px 0 16px 18px;
+  line-height:1.65;
+}
 
-  <footer class="main-footer">
-    <p>© 2026 – Module 2 Analyse du Besoin & CDCF – Auto‑formation interactive</p>
-  </footer>
+.footer{
+  text-align:center;
+  padding:18px;
+  color:var(--muted);
+}
 
-  <!-- html2pdf.js 0.10.1 -->
-  <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"
-    integrity="sha512-YcsIPZqGqZqzT3bZQzQ0jrISFRCGDpa2BkLomqKgJo0vvArkH5vWckHQwZ0pniS3pSkeCZg2nZkGq5cWkQ1QJQ=="
-    crossorigin="anonymous"
-    referrerpolicy="no-referrer"></script>
-  <script src="script.js"></script>
-</body>
-</html>
+@keyframes pulse{
+  0%,100%{transform:scale(1)}
+  50%{transform:scale(1.03)}
+}
+
+@media (max-width:900px){
+  .steps{grid-template-columns:1fr 1fr}
+  .association__row{grid-template-columns:1fr}
+  .panel__header,.panel__footer{align-items:flex-start}
+}
+
+@media (max-width:600px){
+  .steps{grid-template-columns:1fr}
+  .hero{padding:34px 16px}
+  .panel{padding:16px}
+  .report-score{font-size:2rem}
+}
